@@ -1,0 +1,69 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+     <!-- Web3.js-->
+     <script src="node_modules/web3.js-browser/build/web3.js"></script>
+     <script src="node_modules/web3/dist/web3.min.js"></script>	
+	  <script src = "web3connection.js"></script> 
+     <link rel= "stylesheet" href = "style.css"/>
+     <script>
+        var hashcode="";
+        $(document).ready(function(){
+
+              var hashcode=Cookies.get('userhashcode');
+              var username=Cookies.get('username');  
+
+               $("#uname").html(username); 
+               $("#hcode").html(hashcode);
+               web3.eth.getBalance(hashcode).then(function (rvalue) {
+                rvalue = web3.utils.fromWei(rvalue, "ether");
+                console.log(rvalue);
+                $("#balance").html(rvalue + "ETH");
+
+            })
+               var totalrides = 0;
+               var param = new URLSearchParams(window.location.search);
+               var phc = param.get("personhashcode");
+              
+
+              myContract.methods.getUserDetails(phc).call().then(
+        function (returnarray) {
+
+          var obj = returnarray;
+          var output = "Details:  <ul>";
+          output = output + "<li><span class=title>Name</span>:" + obj[0] + "</li>";
+          output = output + "<li><span class=title>Contact No</span>:" + obj[1] + "</li>";
+          output = output + "<li><span class=title>Email</span>:<a href='mailto:" + obj[2] + "' target=blank>" + obj[2] + "</li>";
+          output = output + "</ul>";
+          $("#persondetails").append(output);
+                                
+							//alert(totalrides);
+                      //      JSON.stringify(returnarray, (key, value) => (typeof value === "bigint" ? Number(value) : value))
+                            
+    						});
+
+
+        });
+     </script>
+    </head>
+    <body>
+        <h1>Carpooling</h1>
+        <hr />
+        <div> User <span id = "uname"></span></div>
+        <div>Account ID : <span id = "hcode"></span></div>
+        <hr />
+        <div align = "right">
+            <a class = "btn" href = "userdashboardpanelchoice.html">Dashboard</a>
+            
+         </div>
+        <h4>Ride Details </h4>
+        <div>  <span id = "persondetails"></span>
+
+        </div>
+    </body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Ride Status</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <script src="node_modules/web3.js-browser/build/web3.js"></script>
+    <script src="node_modules/web3/dist/web3.min.js"></script>	
+    <script src="web3connection.js"></script>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+    <h1>Carpooling - Update Ride Status</h1>
+    <hr />
+    <div>User: <span id="uname"></span></div>
+    <div>Account ID: <span id="hcode"></span></div>
+    <div>Account Balance: <span id="balance"></span></div>
+    <hr />
+
+    <h3>Select New Ride Status</h3>
+    <select id="rideStatus">
+        <option value="1">Active</option>
+        <option value="2">Completed</option>
+        <option value="3">Cancelled</option>
+    </select>
+    <br><br>
+    <button id="updateStatus">Update Status</button>
+
+    <h4 id="statusMessage"></h4>
+    <a class="btn" href="dashboard.html">Return to Dashboard</a>
+
+    <script>
+        $(document).ready(async function () {
+            var hashcode = Cookies.get('userhashcode');
+            var username = Cookies.get('username');
+
+            $("#uname").html(username);
+            $("#hcode").html(hashcode);
+
+            // Fetch account balance
+            web3.eth.getBalance(hashcode).then(function (rvalue) {
+                rvalue = web3.utils.fromWei(rvalue, "ether");
+                $("#balance").html(rvalue + " ETH");
+            });
+
+            // Get rideKey from URL
+            var param = new URLSearchParams(window.location.search);
+            var rideKey = param.get("rideKey");
+
+            if (!rideKey) {
+                $("#statusMessage").html("<font color='red'>Invalid Ride ID</font>");
+                return;
+            }
+
+            $("#updateStatus").click(async function () {
+                var newStatus = $("#rideStatus").val();
+
+                try {
+                    await myContract.methods.updateRideStatus(rideKey, newStatus)
+                        .send({ from: hashcode, gas: '3000000' })
+                        .then(function (receipt) {
+                            $("#statusMessage").html(`<font color='green'>Ride Status Successfully Updated.</font>`);
+                        })
+                        .catch(function (error) {
+                            $("#statusMessage").html(`<font color='red'>Error: ${error.message}</font>`);
+                        });
+
+                } catch (err) {
+                    $("#statusMessage").html(`<font color='red'>Transaction Failed: ${err.message}</font>`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
